@@ -165,7 +165,8 @@ pub enum Standard {
     /// The Philips I2S standard.
     Philips,
     // Tdm,
-    // Pdm,
+    /// Pdm standard.
+    Pdm,
 }
 
 /// Supported data formats
@@ -1390,97 +1391,141 @@ mod private {
             });
         }
 
-        fn configure(&self, _standard: &Standard, data_format: &DataFormat) {
+        fn configure(&self, standard: &Standard, data_format: &DataFormat) {
             let i2s = self.register_block();
 
-            #[allow(clippy::useless_conversion)]
-            i2s.tx_conf1().modify(|_, w| unsafe {
-                w.tx_tdm_ws_width()
-                    .bits((data_format.channel_bits() - 1).into());
-                w.tx_bits_mod().bits(data_format.data_bits() - 1);
-                w.tx_tdm_chan_bits().bits(data_format.channel_bits() - 1);
-                w.tx_half_sample_bits().bits(data_format.channel_bits() - 1)
-            });
-            #[cfg(not(esp32h2))]
-            i2s.tx_conf1().modify(|_, w| w.tx_msb_shift().set_bit());
-            #[cfg(esp32h2)]
-            i2s.tx_conf().modify(|_, w| w.tx_msb_shift().set_bit());
-            i2s.tx_conf().modify(|_, w| unsafe {
-                w.tx_mono().clear_bit();
-                w.tx_mono_fst_vld().set_bit();
-                w.tx_stop_en().set_bit();
-                w.tx_chan_equal().clear_bit();
-                w.tx_tdm_en().set_bit();
-                w.tx_pdm_en().clear_bit();
-                w.tx_pcm_bypass().set_bit();
-                w.tx_big_endian().clear_bit();
-                w.tx_bit_order().clear_bit();
-                w.tx_chan_mod().bits(0)
-            });
+            match standard {
+                Standard::Philips => {
+                    #[allow(clippy::useless_conversion)]
+                    i2s.tx_conf1().modify(|_, w| unsafe {
+                        w.tx_tdm_ws_width()
+                            .bits((data_format.channel_bits() - 1).into());
+                        w.tx_bits_mod().bits(data_format.data_bits() - 1);
+                        w.tx_tdm_chan_bits().bits(data_format.channel_bits() - 1);
+                        w.tx_half_sample_bits().bits(data_format.channel_bits() - 1)
+                    });
+                    #[cfg(not(esp32h2))]
+                    i2s.tx_conf1().modify(|_, w| w.tx_msb_shift().set_bit());
+                    #[cfg(esp32h2)]
+                    i2s.tx_conf().modify(|_, w| w.tx_msb_shift().set_bit());
+                    i2s.tx_conf().modify(|_, w| unsafe {
+                        w.tx_mono().clear_bit();
+                        w.tx_mono_fst_vld().set_bit();
+                        w.tx_stop_en().set_bit();
+                        w.tx_chan_equal().clear_bit();
+                        w.tx_tdm_en().set_bit();
+                        w.tx_pdm_en().clear_bit();
+                        w.tx_pcm_bypass().set_bit();
+                        w.tx_big_endian().clear_bit();
+                        w.tx_bit_order().clear_bit();
+                        w.tx_chan_mod().bits(0)
+                    });
 
-            i2s.tx_tdm_ctrl().modify(|_, w| unsafe {
-                w.tx_tdm_tot_chan_num().bits(1);
-                w.tx_tdm_chan0_en().set_bit();
-                w.tx_tdm_chan1_en().set_bit();
-                w.tx_tdm_chan2_en().clear_bit();
-                w.tx_tdm_chan3_en().clear_bit();
-                w.tx_tdm_chan4_en().clear_bit();
-                w.tx_tdm_chan5_en().clear_bit();
-                w.tx_tdm_chan6_en().clear_bit();
-                w.tx_tdm_chan7_en().clear_bit();
-                w.tx_tdm_chan8_en().clear_bit();
-                w.tx_tdm_chan9_en().clear_bit();
-                w.tx_tdm_chan10_en().clear_bit();
-                w.tx_tdm_chan11_en().clear_bit();
-                w.tx_tdm_chan12_en().clear_bit();
-                w.tx_tdm_chan13_en().clear_bit();
-                w.tx_tdm_chan14_en().clear_bit();
-                w.tx_tdm_chan15_en().clear_bit()
-            });
+                    i2s.tx_tdm_ctrl().modify(|_, w| unsafe {
+                        w.tx_tdm_tot_chan_num().bits(1);
+                        w.tx_tdm_chan0_en().set_bit();
+                        w.tx_tdm_chan1_en().set_bit();
+                        w.tx_tdm_chan2_en().clear_bit();
+                        w.tx_tdm_chan3_en().clear_bit();
+                        w.tx_tdm_chan4_en().clear_bit();
+                        w.tx_tdm_chan5_en().clear_bit();
+                        w.tx_tdm_chan6_en().clear_bit();
+                        w.tx_tdm_chan7_en().clear_bit();
+                        w.tx_tdm_chan8_en().clear_bit();
+                        w.tx_tdm_chan9_en().clear_bit();
+                        w.tx_tdm_chan10_en().clear_bit();
+                        w.tx_tdm_chan11_en().clear_bit();
+                        w.tx_tdm_chan12_en().clear_bit();
+                        w.tx_tdm_chan13_en().clear_bit();
+                        w.tx_tdm_chan14_en().clear_bit();
+                        w.tx_tdm_chan15_en().clear_bit()
+                    });
 
-            #[allow(clippy::useless_conversion)]
-            i2s.rx_conf1().modify(|_, w| unsafe {
-                w.rx_tdm_ws_width()
-                    .bits((data_format.channel_bits() - 1).into());
-                w.rx_bits_mod().bits(data_format.data_bits() - 1);
-                w.rx_tdm_chan_bits().bits(data_format.channel_bits() - 1);
-                w.rx_half_sample_bits().bits(data_format.channel_bits() - 1)
-            });
-            #[cfg(not(esp32h2))]
-            i2s.rx_conf1().modify(|_, w| w.rx_msb_shift().set_bit());
-            #[cfg(esp32h2)]
-            i2s.rx_conf().modify(|_, w| w.rx_msb_shift().set_bit());
+                    #[allow(clippy::useless_conversion)]
+                    i2s.rx_conf1().modify(|_, w| unsafe {
+                        w.rx_tdm_ws_width()
+                            .bits((data_format.channel_bits() - 1).into());
+                        w.rx_bits_mod().bits(data_format.data_bits() - 1);
+                        w.rx_tdm_chan_bits().bits(data_format.channel_bits() - 1);
+                        w.rx_half_sample_bits().bits(data_format.channel_bits() - 1)
+                    });
+                    #[cfg(not(esp32h2))]
+                    i2s.rx_conf1().modify(|_, w| w.rx_msb_shift().set_bit());
+                    #[cfg(esp32h2)]
+                    i2s.rx_conf().modify(|_, w| w.rx_msb_shift().set_bit());
 
-            i2s.rx_conf().modify(|_, w| unsafe {
-                w.rx_mono().clear_bit();
-                w.rx_mono_fst_vld().set_bit();
-                w.rx_stop_mode().bits(2);
-                w.rx_tdm_en().set_bit();
-                w.rx_pdm_en().clear_bit();
-                w.rx_pcm_bypass().set_bit();
-                w.rx_big_endian().clear_bit();
-                w.rx_bit_order().clear_bit()
-            });
+                    i2s.rx_conf().modify(|_, w| unsafe {
+                        w.rx_mono().clear_bit();
+                        w.rx_mono_fst_vld().set_bit();
+                        w.rx_stop_mode().bits(2);
+                        w.rx_tdm_en().set_bit();
+                        w.rx_pdm_en().clear_bit();
+                        w.rx_pcm_bypass().set_bit();
+                        w.rx_big_endian().clear_bit();
+                        w.rx_bit_order().clear_bit()
+                    });
 
-            i2s.rx_tdm_ctrl().modify(|_, w| unsafe {
-                w.rx_tdm_tot_chan_num().bits(1);
-                w.rx_tdm_pdm_chan0_en().set_bit();
-                w.rx_tdm_pdm_chan1_en().set_bit();
-                w.rx_tdm_pdm_chan2_en().clear_bit();
-                w.rx_tdm_pdm_chan3_en().clear_bit();
-                w.rx_tdm_pdm_chan4_en().clear_bit();
-                w.rx_tdm_pdm_chan5_en().clear_bit();
-                w.rx_tdm_pdm_chan6_en().clear_bit();
-                w.rx_tdm_pdm_chan7_en().clear_bit();
-                w.rx_tdm_chan8_en().clear_bit();
-                w.rx_tdm_chan9_en().clear_bit();
-                w.rx_tdm_chan10_en().clear_bit();
-                w.rx_tdm_chan11_en().clear_bit();
-                w.rx_tdm_chan12_en().clear_bit();
-                w.rx_tdm_chan13_en().clear_bit();
-                w.rx_tdm_chan14_en().clear_bit();
-                w.rx_tdm_chan15_en().clear_bit()
-            });
+                    i2s.rx_tdm_ctrl().modify(|_, w| unsafe {
+                        w.rx_tdm_tot_chan_num().bits(1);
+                        w.rx_tdm_pdm_chan0_en().set_bit();
+                        w.rx_tdm_pdm_chan1_en().set_bit();
+                        w.rx_tdm_pdm_chan2_en().clear_bit();
+                        w.rx_tdm_pdm_chan3_en().clear_bit();
+                        w.rx_tdm_pdm_chan4_en().clear_bit();
+                        w.rx_tdm_pdm_chan5_en().clear_bit();
+                        w.rx_tdm_pdm_chan6_en().clear_bit();
+                        w.rx_tdm_pdm_chan7_en().clear_bit();
+                        w.rx_tdm_chan8_en().clear_bit();
+                        w.rx_tdm_chan9_en().clear_bit();
+                        w.rx_tdm_chan10_en().clear_bit();
+                        w.rx_tdm_chan11_en().clear_bit();
+                        w.rx_tdm_chan12_en().clear_bit();
+                        w.rx_tdm_chan13_en().clear_bit();
+                        w.rx_tdm_chan14_en().clear_bit();
+                        w.rx_tdm_chan15_en().clear_bit()
+                    });
+                }
+                Standard::Pdm => {
+                    i2s.tx_conf().modify(|_, w| unsafe {
+                        // Mono mode
+                        w.tx_mono().set_bit();
+                        // Stop outputting BCK signal and WS signal when TX FIFO is empty
+                        w.tx_stop_en().set_bit();
+
+                        // 1: The first channel data is valid in I2S TX mono mode. 0: The second channel data is valid in I2S TX mono mode. (R/W)
+                        // w.tx_mono_fst_vld().set_bit();
+
+                        // Enable PDM, bypass PCM, disable TDM
+                        w.tx_pdm_en().set_bit();
+                        w.tx_pcm_bypass().set_bit();
+                        w.tx_tdm_en().clear_bit();
+
+                        // Highest bit is sent first
+                        w.tx_bit_order().clear_bit();
+                        // low address data is saved to low address
+                        w.tx_big_endian().clear_bit();
+
+                        // The left channel data is equal to right channel data in I2S TX mono mode
+                        w.tx_chan_equal().set_bit();
+
+
+                        // Transmit left channel data on both channels
+                        w.tx_chan_mod().bits(1);
+                        // WS remains low when sending left channel data, and remains high when sending right channel dat
+                        w.tx_ws_idle_pol().clear_bit()
+                    });
+                    i2s.tx_conf1().modify(|_, w| unsafe {
+                        w.tx_bits_mod().bits(data_format.data_bits() - 1);
+
+                        // TODO I2S TX half sample bits. This value x 2 is equal to the BCK cycles in one WS period.
+                        w.tx_half_sample_bits().bits(data_format.channel_bits() - 1);
+
+                        // Align at rising edge of the timing between WS signal and the MSB of data
+                        w.tx_msb_shift().set_bit()
+                    });
+                }
+
+            }
         }
 
         fn set_master(&self) {
