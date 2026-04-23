@@ -1,5 +1,4 @@
 use std::{
-    collections::HashSet,
     fs::{self, create_dir_all},
     io::Write,
     path::{Path, PathBuf},
@@ -19,7 +18,35 @@ use crate::{Chip, Package, cargo::CargoArgsBuilder, windows_safe_path};
 
 #[derive(Debug, Default, Clone, PartialEq, Eq, Deserialize, Serialize)]
 struct Manifest {
-    versions: HashSet<semver::Version>,
+    versions: Vec<String>,
+}
+
+impl Manifest {
+    fn insert_version(&mut self, version: impl Into<String>) {
+        let version = version.into();
+        if !self.versions.contains(&version) {
+            self.versions.push(version);
+            self.normalize_versions();
+        }
+    }
+
+    fn normalize_versions(&mut self) {
+        self.versions.sort_by_key(|v| {
+            let trimmed = v.trim();
+            let semver = semver::Version::parse(trimmed).ok();
+            let rank = match trimmed.to_lowercase().as_str() {
+                "main" => 0,
+                "git" => 1,
+                _ => 2,
+            };
+            (
+                semver.is_none(),
+                std::cmp::Reverse(semver),
+                rank,
+                trimmed.to_lowercase(),
+            )
+        });
+    }
 }
 
 /// Build the documentation for the specified packages and chips.
@@ -65,7 +92,7 @@ pub fn build_documentation(
 
         // Update the package manifest to include the latest version:
         let version = crate::package_version(workspace, *package)?;
-        manifest.versions.insert(version.clone());
+        manifest.insert_version(version.to_string());
 
         // Build the documentation for the package:
         if chips.is_empty() {
@@ -747,7 +774,7 @@ mod tests {
 
     use tempfile::TempDir;
 
-    use super::latest_stable_docs_version;
+    use super::{Manifest, latest_stable_docs_version};
 
     fn mkdir(root: &Path, name: &str) {
         fs::create_dir_all(root.join(name)).unwrap();
@@ -793,6 +820,50 @@ mod tests {
         assert_eq!(
             latest_stable_docs_version(root),
             Some("1.0.0".parse().unwrap())
+        );
+    }
+
+    #[test]
+    fn test_manifest_sorting_and_dedup() {
+        let mut manifest = Manifest::default();
+        let input = vec![
+            "main",
+            "1.0.0-beta.1",
+            "0.9.0",
+            "1.2.0",
+            "1.1.1",
+            "1.1.0",
+            "1.1.0-rc.1",
+            "1.1.0-rc.0",
+            "1.1.0-beta.0",
+            "git",
+            "1.0.0",
+            "nightly",
+            "1.0.0-beta.0",
+            "main", // Duplicated main
+        ];
+
+        for v in input {
+            manifest.insert_version(v);
+        }
+
+        assert_eq!(
+            manifest.versions,
+            vec![
+                "1.2.0",
+                "1.1.1",
+                "1.1.0",
+                "1.1.0-rc.1",
+                "1.1.0-rc.0",
+                "1.1.0-beta.0",
+                "1.0.0",
+                "1.0.0-beta.1",
+                "1.0.0-beta.0",
+                "0.9.0",   // Semver descending
+                "main",    // Rank 0
+                "git",     // Rank 1
+                "nightly"  // Rank 2 + alphabetical
+            ]
         );
     }
 }
