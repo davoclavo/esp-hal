@@ -60,7 +60,7 @@ For help getting started with this HAL, please refer to [The Rust on ESP Book] a
 | ------------------------- |:-----:|:--------:|:--------:|:--------:|:--------:|:---------:|:--------:|:--------:|:--------:|
 | ADC                       | ⚒️   | ⚒️      | ⚒️      | ⚒️      | ⚒️      |           | ⚒️      | ⚒️      | ⚒️      |
 | AES                       | ⚒️   |          | ⚒️      | ⚒️      | ⚒️      |           | ⚒️      | ⚒️      | ⚒️      |
-| ASSIST_DEBUG              |       | ⚒️      | ⚒️      | ⚒️      | ⚒️      |           | ⚒️      |          | ⚒️      |
+| ASSIST_DEBUG              |       | ⚒️      | ⚒️      | ⚒️      | ⚒️      | ⚒️       | ⚒️      |          | ⚒️      |
 | Analog Voltage Comparator |       |          |          | [❌][5168] [^1] |          |           |          |          |          |
 | Bit Scrambler             |       |          |          | [❌][5170] [^1] |          |           |          |          |          |
 | Bluetooth                 | ⚒️   | ⚒️      | ⚒️      | ⚒️      | ⚒️      | ⚒️       | ⚒️      |          | ⚒️      |
@@ -110,7 +110,7 @@ For help getting started with this HAL, please refer to [The Rust on ESP Book] a
 | ULP (FSM)                 | ⚒️   |          |          |          |          |           |          | ⚒️      | ⚒️      |
 | ULP (RISC-V)              |       |          |          | [❌][5160] [^1] | ⚒️      |           |          | ⚒️      | ⚒️      |
 | USB OTG FS                |       |          |          |          |          |           |          | ⚒️      | ⚒️      |
-| USB Serial/JTAG           |       |          | ⚒️      | ⚒️      | ⚒️      |           | ⚒️      |          | ⚒️      |
+| USB Serial/JTAG           |       |          | ⚒️      | ⚒️      | ⚒️      | ⚒️       | ⚒️      |          | ⚒️      |
 | WIFI                      | ⚒️   | ⚒️      | ⚒️      | ⚒️      | ⚒️      | ⚒️       |          | ⚒️      | ⚒️      |
 
  * Empty cell: Not available
