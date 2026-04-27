@@ -559,7 +559,7 @@ has_tx_fifo_watermark = true
 bus_timeout_is_exponential = true
 
 [device.i2c_slave]
-support_status = { status = "not_supported", issue = 5156 }
+support_status = { status = "not_supported", issue = 1909 }
 
 [device.rsa]
 support_status = "partial"
@@ -704,8 +704,8 @@ support_status = { status = "not_supported", issue = 5167 }
 [device.hmac]
 support_status = { status = "not_supported", issue = 5166 }
 
-# [device.ecdsa]
-# support_status = "not_supported"
+[device.ecdsa]
+support_status = { status = "not_supported", issue = 5444 }
 
 [device.i2s]
 support_status = { status = "not_supported", issue = 5172 }
