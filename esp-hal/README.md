@@ -94,7 +94,7 @@ For help getting started with this HAL, please refer to [The Rust on ESP Book] a
 | RMT                       | ⚒️   |          | ⚒️      | ⚒️      | ⚒️      |           | ⚒️      | ⚒️      | ⚒️      |
 | RNG                       | ⚒️   | ⚒️      | ⚒️      | ⚒️      | ⚒️      | ⚒️       | ⚒️      | ⚒️      | ⚒️      |
 | RSA                       | ⚒️   |          | ⚒️      | ⚒️      | ⚒️      |           | ⚒️      | ⚒️      | ⚒️      |
-| RTC Timekeeping           | ⚒️   | ⚒️      | ⚒️      | [❌][5162] [^1] | ⚒️      | [❌][5420] [^1] | ⚒️      | ⚒️      | ⚒️      |
+| RTC Timekeeping           | ⚒️   | ⚒️      | ⚒️      | ⚒️      | ⚒️      | ⚒️       | ⚒️      | ⚒️      | ⚒️      |
 | SDIO host                 | ⚒️   |          |          |          |          |           |          |          | ⚒️      |
 | SDIO slave                | ⚒️   |          |          | [❌][5169] [^1] | ⚒️      | [❌][5417] [^1] |          |          |          |
 | SHA                       | ⚒️   | ⚒️      | ⚒️      | ⚒️      | ⚒️      | ⚒️       | ⚒️      | ⚒️      | ⚒️      |
@@ -129,7 +129,6 @@ For help getting started with this HAL, please refer to [The Rust on ESP Book] a
 [5155]: https://github.com/esp-rs/esp-hal/issues/5155
 [5160]: https://github.com/esp-rs/esp-hal/issues/5160
 [5161]: https://github.com/esp-rs/esp-hal/issues/5161
-[5162]: https://github.com/esp-rs/esp-hal/issues/5162
 [5163]: https://github.com/esp-rs/esp-hal/issues/5163
 [5164]: https://github.com/esp-rs/esp-hal/issues/5164
 [5165]: https://github.com/esp-rs/esp-hal/issues/5165
@@ -144,7 +143,6 @@ For help getting started with this HAL, please refer to [The Rust on ESP Book] a
 [5417]: https://github.com/esp-rs/esp-hal/issues/5417
 [5418]: https://github.com/esp-rs/esp-hal/issues/5418
 [5419]: https://github.com/esp-rs/esp-hal/issues/5419
-[5420]: https://github.com/esp-rs/esp-hal/issues/5420
 [5421]: https://github.com/esp-rs/esp-hal/issues/5421
 [5422]: https://github.com/esp-rs/esp-hal/issues/5422
 [5423]: https://github.com/esp-rs/esp-hal/issues/5423
