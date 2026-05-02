@@ -23,11 +23,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ESP32: attenuation is now correctly set for ADC2 (#5463)
 - UART: disallow 0 as the RX FIFO full threshold (#5451)
 - UART: prevent returning 0 from `read_async` (#5451)
-- The `Clocks` struct has been removed (#5461)
+- ESP32-S2, ESP32-S3: Fixed a bug where `UlpCore.run()` with `UlpCoreWakeupSource::HpCpu` fails to wake the ULP Core (#5410)
 
 ### Removed
 
 - ESP32: removed unsupported Hall-effect sensor API (#5463)
+- The `Clocks` struct has been removed (#5461)
 
 ## [v1.1.0] - 2026-04-24
 
