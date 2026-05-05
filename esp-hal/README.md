@@ -80,7 +80,7 @@ For help getting started with this HAL, please refer to [The Rust on ESP Book] a
 | HMAC                      |       |          | ⚒️      | [❌][5166] [^1] | ⚒️      |           | ⚒️      | ❌       | ⚒️      | ⚒️      |
 | I2C master                | ✔️   | ✔️      | ✔️      | ✔️      | ✔️      | ✔️       | ✔️      | ⚒️      | ✔️      | ✔️      |
 | I2C slave                 | [❌][1909] [^1] |          | [❌][1909] [^1] | [❌][1909] [^1] | [❌][1909] [^1] | [❌][1909] [^1] | [❌][1909] [^1] | ❌       | [❌][1909] [^1] | [❌][1909] [^1] |
-| I2S                       | ⚒️   |          | ⚒️      | [❌][5172] [^1] | ⚒️      | [❌][5415] [^1] | ⚒️      | ❌       | ⚒️      | ⚒️      |
+| I2S                       | ⚒️   |          | ⚒️      | ⚒️      | ⚒️      | ⚒️       | ⚒️      | ❌       | ⚒️      | ⚒️      |
 | IEEE 802.15.4             |       |          |          | ⚒️      | ⚒️      |           | ⚒️      |          |          |          |
 | Interrupts                | ⚒️   | ⚒️      | ⚒️      | ⚒️      | ⚒️      | ⚒️       | ⚒️      | ⚒️      | ⚒️      | ⚒️      |
 | IOMUX                     | ⚒️   | ⚒️      | ⚒️      | ⚒️      | ⚒️      | ⚒️       | ⚒️      |          | ⚒️      | ⚒️      |
@@ -141,8 +141,6 @@ For help getting started with this HAL, please refer to [The Rust on ESP Book] a
 [5169]: https://github.com/esp-rs/esp-hal/issues/5169
 [5170]: https://github.com/esp-rs/esp-hal/issues/5170
 [5171]: https://github.com/esp-rs/esp-hal/issues/5171
-[5172]: https://github.com/esp-rs/esp-hal/issues/5172
-[5415]: https://github.com/esp-rs/esp-hal/issues/5415
 [5417]: https://github.com/esp-rs/esp-hal/issues/5417
 [5418]: https://github.com/esp-rs/esp-hal/issues/5418
 [5419]: https://github.com/esp-rs/esp-hal/issues/5419

@@ -4,8 +4,6 @@
 //!
 //! The `SOC` module provides access, functions and structures that are useful
 //! for interacting with various system-related peripherals on `ESP32-C5` chip.
-//!
-//! Also few constants are defined in this module for `ESP32-C5` chip:
 
 crate::unstable_module! {
     pub mod clocks;
@@ -15,8 +13,11 @@ pub(crate) mod regi2c;
 
 pub(crate) use esp32c5 as pac;
 
+#[cfg(i2s_driver_supported)]
 #[cfg_attr(not(feature = "unstable"), allow(unused))]
-pub(crate) mod constants {}
+pub(crate) fn i2s_sclk_frequency() -> u32 {
+    clocks::pll_f160m_frequency()
+}
 
 pub(crate) fn pre_init() {
     // Reset TEE security modes. This allows unrestricted access to TEE masters, including DMA.
@@ -58,7 +59,7 @@ pub unsafe fn cache_invalidate_addr(addr: u32, size: u32) {
 #[unsafe(link_section = ".rwtext")]
 pub unsafe fn cache_get_dcache_line_size() -> u32 {
     unsafe extern "C" {
-        fn Cache_Get_DCache_Line_Size() -> u32;
+        fn Cache_Get_Line_Size() -> u32;
     }
-    unsafe { Cache_Get_DCache_Line_Size() }
+    unsafe { Cache_Get_Line_Size() }
 }

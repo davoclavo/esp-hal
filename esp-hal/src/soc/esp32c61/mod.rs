@@ -4,8 +4,6 @@
 //!
 //! The `SOC` module provides access, functions and structures that are useful
 //! for interacting with various system-related peripherals on `ESP32-C61` chip.
-//!
-//! Also few constants are defined in this module for `ESP32-C61` chip:
 
 crate::unstable_module! {
     pub mod clocks;
@@ -14,6 +12,12 @@ pub mod gpio;
 pub(crate) mod regi2c;
 
 pub(crate) use esp32c61 as pac;
+
+#[cfg(i2s_driver_supported)]
+#[cfg_attr(not(feature = "unstable"), allow(unused))]
+pub(crate) fn i2s_sclk_frequency() -> u32 {
+    clocks::pll_f160m_frequency()
+}
 
 pub(crate) fn pre_init() {
     // Reset TEE security modes. This allows unrestricted access to TEE masters, including DMA.
