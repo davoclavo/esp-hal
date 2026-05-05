@@ -103,6 +103,10 @@ impl CpuClock {
                 Self::_160MHz
             } else if #[cfg(esp32h2)] {
                 Self::_96MHz
+            } else if #[cfg(esp32p4)] {
+                // ESP32-P4 v3.x (eco5): max 400 MHz via CPLL
+                // Ref: TRM v0.5 Ch 2 -- HP CPU max frequency 400 MHz for v3.x
+                Self::_400MHz
             } else {
                 Self::_240MHz
             }
@@ -488,7 +492,17 @@ fn rtc_slow_cal_period() -> u64 {
         }
     }
 
-    LP_AON::regs().store1().read().bits() as u64
+    // P4: LP_SYS (mapped as LP_AON in esp-hal) names its scratch registers
+    // `lp_store0..lp_store14`, while every other chip names them `store0..N`.
+    // TODO: file an esp-pacs issue/PR to rename the P4 fields to match.
+    // Once that lands this cfg branch can disappear.
+    cfg_if::cfg_if! {
+        if #[cfg(esp32p4)] {
+            LP_AON::regs().lp_store1().read().bits() as u64
+        } else {
+            LP_AON::regs().store1().read().bits() as u64
+        }
+    }
 }
 
 /// Convert RTC slow clock ticks to microseconds using the calibrated period.

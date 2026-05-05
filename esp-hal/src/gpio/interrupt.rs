@@ -231,6 +231,13 @@ impl InterruptStatusRegisterAccess {
                     Self::Bank0 => GPIO::regs().status().read().bits(),
                     Self::Bank1 => GPIO::regs().status1().read().bits(),
                 }
+            } else if #[cfg(esp32p4)] {
+                // P4 PAC: intr_0() (Core0 GPIO interrupt status)
+                match self {
+                    Self::Bank0 => GPIO::regs().intr_0().read().bits(),
+                    #[cfg(gpio_has_bank_1)]
+                    Self::Bank1 => GPIO::regs().intr1_0().read().bits(),
+                }
             } else {
                 match self {
                     Self::Bank0 => GPIO::regs().pcpu_int().read().bits(),

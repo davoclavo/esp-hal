@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - C5 and C61: Enable RTC timekeeping (#5449)
+- ESP32-P4: emit `rom_crc_le`, `rom_crc_be`, `rom_md5_bsd` cfg flags (#5400)
+- ESP32-P4: emit `pm_support_ext1_wakeup` and `pm_support_touch_sensor_wakeup` (#5400)
 
 ### Changed
 
