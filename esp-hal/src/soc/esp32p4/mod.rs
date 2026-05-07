@@ -10,26 +10,53 @@ pub(crate) mod regi2c;
 
 pub(crate) use esp32p4 as pac;
 
-// P4 DMA module alias: the esp-hal GDMA driver expects the GDMA-AHB (`ahb_dma`)
-// register layout. The PAC's `dma` module maps to a different block (see
-// SOC_DW_GDMA_SUPPORTED), so alias `ahb_dma` to keep ahb_v2.rs type paths working.
-#[allow(unused)]
-pub(crate) mod dma_compat {
-    pub use super::pac::ahb_dma::*;
-}
-
 pub(crate) mod registers {
     pub const INTERRUPT_MAP_BASE: u32 = 0x500D_6000;
+    #[expect(dead_code)]
     pub const INTERRUPT_MAP_BASE_APP_CPU: u32 = 0x500D_6800;
-}
-
-pub(crate) mod constants {
-    #[allow(dead_code)] // used by other chips; reserved for future P4 DRAM boundary checks
-    pub const SOC_DRAM_LOW: u32 = 0x4FF0_0000;
-    #[allow(dead_code)]
-    pub const SOC_DRAM_HIGH: u32 = 0x4FFC_0000;
 }
 
 pub(crate) fn pre_init() {
     // TODO: Check if anything needs to be done here
+}
+
+const CACHE_MAP_L1_ICACHE_0: u32 = 1 << 0;
+const CACHE_MAP_L1_ICACHE_1: u32 = 1 << 1;
+const CACHE_MAP_L1_DCACHE: u32 = 1 << 4;
+const CACHE_MAP_L2_CACHE: u32 = 1 << 5;
+
+/// Write back a specific range of data in the cache.
+pub(crate) unsafe fn cache_writeback_addr(addr: u32, size: u32) {
+    unsafe extern "C" {
+        fn Cache_WriteBack_Addr(bus: u32, addr: u32, size: u32);
+    }
+
+    unsafe {
+        Cache_WriteBack_Addr(
+            CACHE_MAP_L1_ICACHE_0
+                | CACHE_MAP_L1_ICACHE_1
+                | CACHE_MAP_L1_DCACHE
+                | CACHE_MAP_L2_CACHE,
+            addr,
+            size,
+        );
+    }
+}
+
+/// Write back a specific range of data in the cache.
+pub(crate) unsafe fn cache_invalidate_addr(addr: u32, size: u32) {
+    unsafe extern "C" {
+        fn Cache_Invalidate_Addr(bus: u32, addr: u32, size: u32);
+    }
+
+    unsafe {
+        Cache_Invalidate_Addr(
+            CACHE_MAP_L1_ICACHE_0
+                | CACHE_MAP_L1_ICACHE_1
+                | CACHE_MAP_L1_DCACHE
+                | CACHE_MAP_L2_CACHE,
+            addr,
+            size,
+        );
+    }
 }

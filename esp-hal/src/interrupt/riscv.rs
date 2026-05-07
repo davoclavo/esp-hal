@@ -312,15 +312,6 @@ pub fn enable_direct(
             let clic = unsafe { crate::soc::pac::CLIC::steal() };
 
             // Enable hardware vectoring
-            #[cfg(esp32p4)]
-            clic.int_ctrl(cpu_interrupt as usize).modify(|_, w| unsafe {
-                // P4: CLIC uses consolidated int_ctrl register (not separate int_attr).
-                // int_ctrl contains: int_ip[0], int_ie[8], int_attr_shv[16],
-                //   int_attr_trig[17:18], int_attr_mode[22:23], int_ctl[24:31]
-                w.int_attr_shv().set_bit();
-                w.int_attr_trig().bits(0) // positive level
-            });
-            #[cfg(not(esp32p4))]
             clic.int_attr(cpu_interrupt as usize).modify(|_, w| {
                 w.shv().hardware();
                 w.trig().positive_level()
@@ -368,6 +359,14 @@ pub fn enable_direct(
     cpu_int::set_priority_raw(cpu_interrupt as u32, level);
     cpu_int::set_kind_raw(cpu_interrupt as u32, InterruptKind::Level);
     cpu_int::enable_cpu_interrupt_raw(cpu_interrupt as u32);
+
+    #[cfg(esp32p4)]
+    unsafe {
+        // Write back the cache to make sure the new interrupt handler is visible to the CPU.
+        crate::soc::cache_writeback_addr(mtvt_table as u32, 48 * 4);
+        // Invalidate the cache to make sure the CPU does not read from a stale instruction cache.
+        crate::soc::cache_invalidate_addr(mtvt_table as u32, 48 * 4);
+    }
 }
 
 // helper: returns correctly encoded RISC-V `jal` instruction
@@ -418,18 +417,8 @@ fn cpu_wait_mode_on() -> bool {
     cfg_if::cfg_if! {
         if #[cfg(soc_has_pcr)] {
             crate::peripherals::PCR::regs().cpu_waiti_conf().read().cpu_wait_mode_force_on().bit_is_set()
-        } else if #[cfg(all(multi_core, soc_has_hp_sys_clkrst))] {
-            // AMP-aware: read this core's CORE{N}_WAITI_ICG_EN bit in
-            // HP_SYS_CLKRST.CPU_WAITI_CTRL0 (hw_ver3). Each core answers
-            // locally, so AMP setups where cores run different firmware get
-            // the right per-core result.
-            //   ICG_EN = 1 -> this core's WFI may gate clock -> NOT safe
-            //   ICG_EN = 0 -> WFI will not gate             -> safe
-            // TODO: add HP_SYS_CLKRST.CPU_WAITI_CTRL0 (offset 0xF4) to the
-            // esp32p4 PAC and replace this raw MMIO with the PAC accessor.
-            const HP_SYS_CLKRST_CPU_WAITI_CTRL0: *const u32 = 0x500E_60F4 as *const u32;
-            let reg = unsafe { core::ptr::read_volatile(HP_SYS_CLKRST_CPU_WAITI_CTRL0) };
-            (reg & (1 << Cpu::current() as u32)) == 0
+        } else if #[cfg(soc_has_hp_sys)] {
+            crate::peripherals::HP_SYS::regs().cpu_waiti_conf().read().cpu_wait_mode_force_on().bit_is_set()
         } else {
             crate::peripherals::SYSTEM::regs()
                 .cpu_per_conf()
