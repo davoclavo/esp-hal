@@ -758,6 +758,29 @@ mod tests {
     }
 
     #[test]
+    fn rmt_frequency_matches_configured(mut ctx: Context) {
+        let rmt = Rmt::new(ctx.rmt.reborrow(), FREQ).unwrap();
+        assert_eq!(rmt.frequency(), FREQ);
+        assert_eq!(rmt.channel0.frequency(), FREQ);
+
+        let channel = rmt
+            .channel0
+            .configure_tx(&TxChannelConfig::default())
+            .unwrap();
+        assert_eq!(channel.frequency(), FREQ);
+    }
+
+    // ESP32 / ESP32-S2 only support frequency == source clock; skip the divider check there.
+    #[cfg(not(any(esp32, esp32s2)))]
+    #[test]
+    fn rmt_frequency_with_divider(mut ctx: Context) {
+        // Request half the source clock; the source-clock divider should round to (FREQ / 2).
+        let half = Rate::from_hz(FREQ.as_hz() / 2);
+        let rmt = Rmt::new(ctx.rmt.reborrow(), half).unwrap();
+        assert_eq!(rmt.frequency(), half);
+    }
+
+    #[test]
     fn rmt_overlapping_ram_release(mut ctx: Context) {
         let rmt = Rmt::new(ctx.rmt.reborrow(), FREQ).unwrap();
 

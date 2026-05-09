@@ -755,6 +755,16 @@ for_each_rmt_channel!(
                         _mode: PhantomData,
                     }
                 }
+
+                /// The actual configured RMT source clock rate.
+                ///
+                /// `Rmt::new` validates the requested frequency against the chip's RMT clock
+                /// source and rounds it down to the nearest divisor. This returns the rounded
+                /// rate that the hardware was actually configured for, which may differ from
+                /// the requested rate.
+                pub fn frequency(&self) -> Rate {
+                    self::chip_specific::current_clock_rate()
+                }
             }
 
             impl<'rmt> Rmt<'rmt, Blocking> {
@@ -1288,6 +1298,15 @@ where
             _guard: None,
         }
     }
+
+    /// The actual configured RMT source clock rate.
+    ///
+    /// See [`Rmt::frequency`] for details. The per-channel divider configured via
+    /// [`TxChannelConfig::with_clk_divider`] / [`RxChannelConfig::with_clk_divider`] is not
+    /// reflected in this value.
+    pub fn frequency(&self) -> Rate {
+        self::chip_specific::current_clock_rate()
+    }
 }
 
 impl<'ch, Dm> Channel<'ch, Dm, Tx>
@@ -1358,6 +1377,13 @@ pub trait TxChannelCreator<'ch, Dm>
 where
     Dm: crate::DriverMode,
 {
+    /// The actual configured RMT source clock rate.
+    ///
+    /// See [`Rmt::frequency`] for details.
+    fn frequency(&self) -> Rate {
+        self::chip_specific::current_clock_rate()
+    }
+
     /// Configure the TX channel
     ///
     /// ## Errors
@@ -1373,6 +1399,13 @@ pub trait RxChannelCreator<'ch, Dm>
 where
     Dm: crate::DriverMode,
 {
+    /// The actual configured RMT source clock rate.
+    ///
+    /// See [`Rmt::frequency`] for details.
+    fn frequency(&self) -> Rate {
+        self::chip_specific::current_clock_rate()
+    }
+
     /// Configure the RX channel
     ///
     /// ## Errors
@@ -2346,6 +2379,29 @@ mod chip_specific {
         u8::try_from(div - 1).map_err(|_| ConfigError::UnreachableTargetFrequency)
     }
 
+    pub(super) fn current_clock_rate() -> Rate {
+        // `Rmt::new` only ever uses `ClockSource::default()`, so the source select bits in
+        // PCR/sys_conf will match the default. Read the divider that `configure_clock` wrote
+        // and apply it to the default source's frequency.
+        let div: u8 = {
+            #[cfg(soc_has_pcr)]
+            {
+                crate::peripherals::PCR::regs()
+                    .rmt_sclk_conf()
+                    .read()
+                    .sclk_div_num()
+                    .bits()
+            }
+
+            #[cfg(not(soc_has_pcr))]
+            {
+                RMT::regs().sys_conf().read().sclk_div_num().bits()
+            }
+        };
+
+        Rate::from_hz(ClockSource::default().freq().as_hz() / (u32::from(div) + 1))
+    }
+
     pub(super) fn configure_clock(source: ClockSource, div: u8) {
         #[cfg(soc_has_clock_node_rmt_sclk)]
         let _ = source;
@@ -2883,6 +2939,12 @@ mod chip_specific {
         }
 
         Ok(1)
+    }
+
+    pub(super) fn current_clock_rate() -> Rate {
+        // ESP32 and ESP32-S2 don't have a source-clock divider for RMT, and `Rmt::new` always
+        // uses `ClockSource::default()` (APB on these chips), so the rate is fixed.
+        ClockSource::default().freq()
     }
 
     pub(super) fn configure_clock(source: ClockSource, _div: u8) {
